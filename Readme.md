@@ -12,7 +12,7 @@
 После установки пакета, вам нужно опубликовать конфигурационный файл. Вы можете сделать это с помощью следующей команды:
 ``` bash
 php artisan vendor:publish --tag=flux-orders-config
-php artisan vendor:publish --provider="Nurdaulet\FluxOrders\FluxOrderssServiceProvider"
+php artisan vendor:publish --provider="Nurdaulet\FluxOrders\FluxOrdersServiceProvider"
 
 ```
 
