@@ -20,7 +20,6 @@
         "nurdaulet/flux-items": "dev-main",
         "nurdaulet/sms-kz": "^1.0.0",
         "filament/filament": "^2.16",
-        "laravel/framework": "^9.19",
         "filament/spatie-laravel-translatable-plugin": "^2.17"
     },
     "minimum-stability": "dev",
