@@ -1,0 +1,68 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        if (Schema::hasTable('cancel_reasons')) {
+            $this->checkColumns();
+        } else {
+            Schema::create('cancel_reasons', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->text('description')->nullable();
+                $table->tinyInteger('status')->default(1);
+                $table->integer('type')->default(0);
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
+    }
+
+    private function checkColumns()
+    {
+        if (!Schema::hasColumn('cancel_reasons', 'name')) {
+            Schema::table('cancel_reasons', function (Blueprint $table) {
+                $table->string('name')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('cancel_reasons', 'description')) {
+            Schema::table('cancel_reasons', function (Blueprint $table) {
+                $table->text('description')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('cancel_reasons', 'status')) {
+            Schema::table('cancel_reasons', function (Blueprint $table) {
+                $table->tinyInteger('status')->default(1);
+            });
+        }
+        if (!Schema::hasColumn('cancel_reasons', 'type')) {
+            Schema::table('cancel_reasons', function (Blueprint $table) {
+                $table->integer('type')->default(0);
+            });
+        }
+        if (!Schema::hasColumn('cancel_reasons', 'deleted_at')) {
+            Schema::table('cancel_reasons', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('cancel_reasons');
+    }
+};

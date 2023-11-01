@@ -1,0 +1,228 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        if (Schema::hasTable('orders')) {
+            $this->checkColumns();
+        } else {
+            Schema::create('orders', function (Blueprint $table) {
+                $table->id();
+
+                $table->foreignId('item_id')->nullable()->index()->constrained('items')->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+                $table->foreignId('receive_method_id')->nullable()->constrained('receive_methods')->nullOnDelete();
+
+                $table->unsignedBigInteger('payment_method_id')->nullable();
+                $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->nullOnDelete();
+                $table->date('date_from')->nullable();
+                $table->date('date_to')->nullable();
+                $table->text('comment')->nullable();
+                $table->integer('rent_price')->default(0);
+                $table->integer('total_price')->default(0);
+
+                $table->tinyInteger('client_status')->default(0);
+                $table->tinyInteger('lord_status')->default(0);
+                $table->tinyInteger('status')->default(0);
+                $table->foreignId('store_id')->nullable()->constrained('stores');
+                $table->string('platform')->nullable();
+                $table->timestamp('accepted_at')->nullable();
+                $table->string('rent_value')->nullable();
+                $table->foreignId('rent_type_id')->nullable()->constrained('rent_types');
+                $table->foreignId('lord_id')->nullable()->constrained('users');
+                $table->text('address')->nullable();
+                $table->string('lat')->nullable();
+                $table->string('lng')->nullable();
+                $table->string('phone')->nullable();
+                $table->float('delivery_price', 8, 2)->default(0);
+                $table->date('delivery_date')->nullable();
+                $table->string('delivery_time')->nullable();
+                $table->boolean('is_fast_delivery')->default(false);
+                $table->boolean('is_used_bonus')->default(false);
+                $table->double('bonus')->nullable();
+                $table->foreignId('city_id')->nullable()->constrained('cities')->cascadeOnDelete();
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
+    }
+    private function checkColumns()
+    {
+        if (!Schema::hasColumn('orders', 'item_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('item_id')->nullable()->index()->constrained('items')->cascadeOnDelete();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'user_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'receive_method_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('receive_method_id')->nullable()->constrained('receive_methods')->nullOnDelete();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'payment_method_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->nullOnDelete();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'date_from')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->date('date_from')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'date_to')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->date('date_to')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'comment')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->text('comment')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'rent_price')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->integer('rent_price')->default(0);
+            });
+        }
+        if (!Schema::hasColumn('orders', 'total_price')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->integer('total_price')->default(0);
+            });
+        }
+        if (!Schema::hasColumn('orders', 'client_status')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->tinyInteger('client_status')->default(0);
+            });
+        }
+
+        if (!Schema::hasColumn('orders', 'lord_status')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->tinyInteger('lord_status')->default(0);
+            });
+        }
+
+        if (!Schema::hasColumn('orders', 'status')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->tinyInteger('status')->default(0);
+            });
+        }
+        if (!Schema::hasColumn('orders', 'store_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('store_id')->nullable()->constrained('stores');
+            });
+        }
+        if (!Schema::hasColumn('orders', 'platform')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('platform')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'accepted_at')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->timestamp('accepted_at')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'rent_value')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('rent_value')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'rent_type_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('rent_type_id')->nullable()->constrained('rent_types');
+            });
+        }
+        if (!Schema::hasColumn('orders', 'lord_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('lord_id')->nullable()->constrained('users');
+            });
+        }
+        if (!Schema::hasColumn('orders', 'address')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->text('address')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'lat')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('lat')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'lng')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('lng')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'phone')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('phone')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'delivery_price')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->float('delivery_price', 8, 2)->default(0);
+            });
+        }
+        if (!Schema::hasColumn('orders', 'delivery_date')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->date('delivery_date')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('orders', 'delivery_time')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('delivery_time')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'is_fast_delivery')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->boolean('is_fast_delivery')->default(false);
+            });
+        }
+        if (!Schema::hasColumn('orders', 'is_used_bonus')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->boolean('is_used_bonus')->default(false);
+            });
+        }
+        if (!Schema::hasColumn('orders', 'bonus')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->double('bonus')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'city_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('city_id')->nullable()->constrained('cities')->cascadeOnDelete();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'deleted_at')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+        }
+
+
+
+
+    }
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('orders');
+    }
+};

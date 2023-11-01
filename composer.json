@@ -1,0 +1,39 @@
+{
+    "name": "nurdaulet/flux-orders",
+    "description": "orders",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Nurdaulet",
+            "email": "artykbaev.nurdaulet@mail.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Nurdaulet\\FluxOrders\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.0",
+        "spatie/laravel-translatable": "^6.5",
+        "nurdaulet/flux-base": "dev-main",
+        "nurdaulet/flux-items": "dev-main",
+        "nurdaulet/sms-kz": "^1.0.0",
+        "filament/filament": "^2.16",
+        "laravel/framework": "^9.19",
+        "filament/spatie-laravel-translatable-plugin": "^2.17"
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nurdaulet\\FluxOrders\\FluxOrdersServiceProvider",
+                "Nurdaulet\\FluxOrders\\FluxOrdersFilamentServiceProvider"
+            ],
+            "aliases": {
+                "TextConverter": "Nurdaulet\\FluxOrders\\Facades\\TextConverter",
+                "StringFormatter": "Nurdaulet\\FluxOrders\\Facades\\StringFormatter"
+            }
+        }
+    }
+}
