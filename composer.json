@@ -16,8 +16,8 @@
     "require": {
         "php": "^8.0",
         "spatie/laravel-translatable": "^6.5",
-        "nurdaulet/flux-base": "dev-main",
-        "nurdaulet/flux-items": "dev-main",
+        "nurdaulet/flux-base": "*",
+        "nurdaulet/flux-items": "*",
         "nurdaulet/sms-kz": "^1.0.0",
         "filament/filament": "^2.16",
         "filament/spatie-laravel-translatable-plugin": "^2.17"
