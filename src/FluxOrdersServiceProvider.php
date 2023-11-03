@@ -41,9 +41,9 @@ class FluxOrdersServiceProvider extends ServiceProvider
         ], 'flux-orders-config');
 
 
-        if (!file_exists(config_path('flux-orders.php'))) {
-            Artisan::call('vendor:publish', ['--tag' => 'flux-orders-config']);
-        }
+//        if (!file_exists(config_path('flux-orders.php'))) {
+//            Artisan::call('vendor:publish', ['--tag' => 'flux-orders-config']);
+//        }
     }
 
     protected function publishMigrations()
