@@ -17,8 +17,8 @@ return new class extends Migration {
         } else {
             Schema::create('canceled_orders', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
-                $table->foreignId('cancel_id')->constrained('cancel_reasons')->nullOnDelete();
+                $table->foreignId('order_id')->nullable()->constrained('orders')->cascadeOnDelete();
+                $table->foreignId('cancel_id')->nullable()->constrained('cancel_reasons')->nullOnDelete();
                 $table->text('comment')->nullable();
                 $table->foreignId('lord_id')->constrained('users');
                 $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
@@ -32,12 +32,12 @@ return new class extends Migration {
     {
         if (!Schema::hasColumn('canceled_orders', 'order_id')) {
             Schema::table('canceled_orders', function (Blueprint $table) {
-                $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+                $table->foreignId('order_id')->nullable()->constrained('orders')->cascadeOnDelete();
             });
         }
         if (!Schema::hasColumn('canceled_orders', 'cancel_id')) {
             Schema::table('canceled_orders', function (Blueprint $table) {
-                $table->foreignId('cancel_id')->constrained('cancel_reasons')->nullOnDelete();
+                $table->foreignId('cancel_id')->nullable()->constrained('cancel_reasons')->nullOnDelete();
             });
         }
         if (!Schema::hasColumn('canceled_orders', 'comment')) {
@@ -61,6 +61,7 @@ return new class extends Migration {
             });
         }
     }
+
 
     /**
      * Reverse the migrations.

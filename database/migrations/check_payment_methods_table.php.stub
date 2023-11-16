@@ -18,7 +18,8 @@ return new class extends Migration {
         } else {
             Schema::create('payment_methods', function (Blueprint $table) {
                 $table->id();
-                $table->string('name')->nullable();
+                $table->text('name')->nullable();
+                $table->string('slug')->nullable();
                 $table->boolean('is_active')->default(false);
                 $table->string('image')->nullable();
                 $table->timestamps();
@@ -31,7 +32,7 @@ return new class extends Migration {
     {
         if (!Schema::hasColumn('payment_methods', 'name')) {
             Schema::table('payment_methods', function (Blueprint $table) {
-                $table->string('name')->nullable();
+                $table->text('name')->nullable();
             });
         }
         if (!Schema::hasColumn('payment_methods', 'is_active')) {

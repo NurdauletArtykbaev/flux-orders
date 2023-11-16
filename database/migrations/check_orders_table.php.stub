@@ -23,7 +23,6 @@ return new class extends Migration
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
                 $table->foreignId('receive_method_id')->nullable()->constrained('receive_methods')->nullOnDelete();
 
-                $table->unsignedBigInteger('payment_method_id')->nullable();
                 $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->nullOnDelete();
                 $table->date('date_from')->nullable();
                 $table->date('date_to')->nullable();
