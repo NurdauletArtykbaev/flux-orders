@@ -24,6 +24,7 @@ return [
         'send_sms_when_created_order' => false,
         'send_telegram_when_created_order' => false,
         'use_list_items_count' => false,
+        'is_enabled_cart' => true,
         'cache_expiration' => 269746,
         'use_roles' => false
     ],

@@ -22,7 +22,8 @@ class OrderController
     public function store(OrderStoreRequest $request)
     {
         $user = $request->user();
-        $order = $this->orderService->create($user, $request);
+        $this->orderService->createFromCart($user, $request->validated());
+
 
         return response()->noContent();
     }

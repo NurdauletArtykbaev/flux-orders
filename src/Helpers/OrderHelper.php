@@ -39,6 +39,8 @@ class OrderHelper
     public static function calcCommissionService($amount)
     {
         return round($amount *  self::SERVICE_COMMISSION_PERCENTAGE / 100) ;
-
     }
+    const TYPE_SELL = 1;
+    const TYPE_RENT = 2;
+    const TYPE_APPLICATION = 3;
 }

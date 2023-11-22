@@ -2,6 +2,7 @@
 
 namespace Nurdaulet\FluxOrders\Services;
 
+use Nurdaulet\FluxItems\Helpers\ItemHelper;
 use Nurdaulet\FluxOrders\Helpers\OrderHelper;
 use App\Helpers\RentalDayHelper;
 use App\Helpers\TransactionHelper;
@@ -10,6 +11,7 @@ use App\Models\CanceledOrder;
 use App\Models\Order;
 use App\Notifications\TelegramNotification;
 use Nurdaulet\FluxItems\Repositories\ItemRepository;
+use Nurdaulet\FluxOrders\Models\Cart;
 use Nurdaulet\FluxOrders\Repositories\CanceledOrderRepository;
 use Nurdaulet\FluxOrders\Repositories\OrderRepository;
 use Carbon\Carbon;
@@ -38,7 +40,7 @@ class OrderService
     public function show($id)
     {
         return $this->orderRepository->find($id, [
-            'item.images', 'item', 'rentType',
+            'items.images', 'rentType',
             'receiveMethod', 'paymentMethod', 'city'
         ]);
 //        $order->ad->user->contract_url = $order->ad->user->contract_url ?? null;
@@ -126,34 +128,70 @@ class OrderService
         return [$totalPrice, 0];
     }
 
-    public function create($user, $request)
+    public function createFromCart($user, $data)
     {
-        $this->checkByLimitCancelledOrder($user);
-        $item = $this->itemRepository->find($request->get('item_id'), ['user']);
-        $isUsedBonus = $request->input('is_used_bonus', false);
+//        $this->checkByLimitCancelledOrder($user);
+//        $item = $this->itemRepository->find($request->get('item_id'), ['user']);
+//        $isUsedBonus = $data['is_used_bonus'] ?? false;
+        $cart = Cart::with(['items' => fn($query) => $query->with(ItemHelper::getPriceRelation())])->firstOrFail();
+//        $cart = config('flux-items.models.cart')::where('user_id', $user->id)
+//            ->with(['paymentMethod', 'items' => function ($query) {
+//                return $query->with([ItemHelper::getPriceRelation(), 'images', 'pivot.receiveMethod', 'pivot.userAddress']);
+//            }])
+//            ->first();
 
-        $totalPrice = $request->get('total_price');
-        [$totalPrice, $usedBonus] = $this->calculateOrderTotalPriceIfUsedBonus($isUsedBonus, $user, $totalPrice);
+//        if (!$cart?->id) {
+//            return new Cart();
+//        }
+        $lords = config('flux-items.models.user')::whereIn('id', $cart->items->pluck('user_id')->toArray())->get();
 
-        $data = $this->prepareCreateData($user,$request->all());
+
+        foreach ($lords as $lord) {
+            $items = $cart->items->where('user_id', $user->id);
+            $itemsTypes = $items->pluck('type')->unique()->toArray();
+            if (count($itemsTypes) > 1) {
+                foreach ($itemsTypes as $itemsType) {
+                    $itemsTypeBy = $items->where('type', $itemsType);
+
+
+                }
+            }
+            dd($items->pluck('type')->unique()->toArray());
+//            $user->setRelation('items', $items);
+//        }
+//        dd($user);
+//        $cart->setRelation('users', $users);
+//        foreach ($cart->users as $user) {
+            $order = \Nurdaulet\FluxOrders\Models\Order::create([
+                'user_id' => $user->id,
+                'lord_id' => $lord->id,
+                'platform' => request('platform'),
+            ]);
+            dd($order);
+            $order->items()->saveMany([
+
+            ]);
+        }
+        $data = $this->prepareCreateData($user,$data);
 
         DB::beginTransaction();
         $order = $this->orderRepository->create($data);
-        $this->payOrderIfUsedBonus($isUsedBonus, $user, $order, $request->get('total_price'));
+//        $this->payOrderIfUsedBonus($isUsedBonus, $user, $order, $totalPrice);
+
         DB::commit();
 
-        if (app()->isProduction()) {
-            if (config('flux-orders.options.send_sms_when_created_order', false)) {
-                if ($item?->user?->phone) {
-                    \SmsKz::to($item->user?->phone)->text("Поступил Новый заказ  " . env('APP_NAME') . ". Успейте обработать заказ!")
-                        ->send();
-                }
-            }
-            if (config('flux-orders.options.send_telegram_when_created_order', false)) {
-//                // telgoram notification text
-//                $order->notify(new TelegramNotification());
-            }
-        }
+//        if (app()->isProduction()) {
+//            if (config('flux-orders.options.send_sms_when_created_order', false)) {
+////                if ($item?->user?->phone) {
+////                    \SmsKz::to($item->user?->phone)->text("Поступил Новый заказ  " . env('APP_NAME') . ". Успейте обработать заказ!")
+////                        ->send();
+////                }
+//            }
+//            if (config('flux-orders.options.send_telegram_when_created_order', false)) {
+////                // telgoram notification text
+////                $order->notify(new TelegramNotification());
+//            }
+//        }
         return $order;
     }
 
@@ -189,13 +227,11 @@ class OrderService
     private function prepareCreateData($user, $data)
     {
         $item = $this->itemRepository->find($data['item_id'], ['user']);
-        $isUsedBonus = $data['is_used_bonus'] ?? false;
         $totalPrice = $data['total_price'];
 
-        [$totalPrice, $usedBonus] = $this->calculateOrderTotalPriceIfUsedBonus($isUsedBonus, $user, $totalPrice);
+//        [$totalPrice, $usedBonus] = $this->calculateOrderTotalPriceIfUsedBonus($isUsedBonus, $user, $totalPrice);
 
         return [
-            'item_id' => $data['item_id'],
             'city_id' => (int)$data['city_id'],
             'phone' => $data['phone'] ?? null,
             'user_id' => $user->id,
@@ -219,7 +255,6 @@ class OrderService
             'is_fast_delivery' => ($data['is_fast_delivery'] ?? null) == 'true',
             'rent_type_id' => $data['rent_type_id'] ?? null,
             'status' => Order::GENERAL_NEW,
-            'is_used_bonus' => $isUsedBonus,
             'bonus' => $usedBonus,
             'client_status' => OrderHelper::CLIENT_PROCESSING,
             'lord_status' => OrderHelper::LORD_NEW_ORDER,

@@ -30,15 +30,13 @@ class OrderRepository
 
     public function count($filters = [])
     {
-        return config('flux-orders.models.order')::with('item')
-            ->applyFilters(new OrderFilter(), $filters)
+        return config('flux-orders.models.order')::applyFilters(new OrderFilter(), $filters)
             ->count();
     }
 
     public function create($data)
     {
-        return config('flux-orders.models.order')::with('item')
-            ->create($data);
+        return config('flux-orders.models.order')::create($data);
     }
 
     public function update($filters = [], $data = [])

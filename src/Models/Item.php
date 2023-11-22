@@ -36,6 +36,11 @@ class Item extends Model
     {
         return $this->hasMany(Order::class, 'ad_id');
     }
+    public function rentTypes()
+    {
+        return $this->belongsToMany(RentType::class, RentTypeItem::class, 'item_id', 'rent_type_id')
+            ->withPivot('item_id', 'rent_type_id', 'price', 'old_price');
+    }
 
     public function scopeActive($query)
     {

@@ -18,26 +18,17 @@ return new class extends Migration
         } else {
             Schema::create('orders', function (Blueprint $table) {
                 $table->id();
-
-                $table->foreignId('item_id')->nullable()->index()->constrained('items')->cascadeOnDelete();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
                 $table->foreignId('receive_method_id')->nullable()->constrained('receive_methods')->nullOnDelete();
-
                 $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->nullOnDelete();
                 $table->date('date_from')->nullable();
                 $table->date('date_to')->nullable();
-                $table->text('comment')->nullable();
-                $table->integer('rent_price')->default(0);
                 $table->integer('total_price')->default(0);
-
                 $table->tinyInteger('client_status')->default(0);
                 $table->tinyInteger('lord_status')->default(0);
                 $table->tinyInteger('status')->default(0);
                 $table->foreignId('store_id')->nullable()->constrained('stores');
                 $table->string('platform')->nullable();
-                $table->timestamp('accepted_at')->nullable();
-                $table->string('rent_value')->nullable();
-                $table->foreignId('rent_type_id')->nullable()->constrained('rent_types');
                 $table->foreignId('lord_id')->nullable()->constrained('users');
                 $table->text('address')->nullable();
                 $table->string('lat')->nullable();
@@ -49,6 +40,7 @@ return new class extends Migration
                 $table->boolean('is_fast_delivery')->default(false);
                 $table->boolean('is_used_bonus')->default(false);
                 $table->double('bonus')->nullable();
+                $table->tinyInteger('type')->default(\Nurdaulet\FluxOrders\Helpers\OrderHelper::TYPE_SELL);
                 $table->foreignId('city_id')->nullable()->constrained('cities')->cascadeOnDelete();
                 $table->timestamps();
                 $table->softDeletes();
@@ -90,6 +82,11 @@ return new class extends Migration
         if (!Schema::hasColumn('orders', 'comment')) {
             Schema::table('orders', function (Blueprint $table) {
                 $table->text('comment')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('orders', 'type')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->tinyInteger('type')->default();
             });
         }
         if (!Schema::hasColumn('orders', 'rent_price')) {
@@ -202,7 +199,7 @@ return new class extends Migration
         }
         if (!Schema::hasColumn('orders', 'city_id')) {
             Schema::table('orders', function (Blueprint $table) {
-                $table->foreignId('city_id')->nullable()->constrained('cities')->cascadeOnDelete();
+                $table->foreignId('city_id')->nulla ble()->constrained('cities')->cascadeOnDelete();
             });
         }
         if (!Schema::hasColumn('orders', 'deleted_at')) {

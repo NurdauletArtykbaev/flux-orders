@@ -16,7 +16,6 @@ class Order extends Model
 {
     use HasFactory, Reviewable, SoftDeletes, Notifiable, HasFilters;
 
-    protected $table = 'orders';
     protected $guarded = ['id'];
 
 //Принять Заказ ( у продавца)
@@ -71,13 +70,13 @@ class Order extends Model
         return $this->belongsTo(Item::class)->withTrashed();
     }
 
-    public function createdAt(): Attribute
-    {
-        return Attribute::make(
-            get: function (mixed $value, array $attributes) {
-                return $attributes['created_at'] ? Carbon::create($attributes['created_at'])->addHours(6)->timezone('Asia/Almaty') : null;
-            });
-    }
+//    public function createdAt(): Attribute
+//    {
+//        return Attribute::make(
+//            get: function (mixed $value, array $attributes) {
+//                return $attributes['created_at'] ? Carbon::create($attributes['created_at'])->addHours(6)->timezone('Asia/Almaty') : null;
+//            });
+//    }
 
     public function user()
     {
