@@ -30,10 +30,9 @@ return new class extends Migration
                 $table->foreignId('store_id')->nullable()->constrained('stores');
                 $table->string('platform')->nullable();
                 $table->foreignId('lord_id')->nullable()->constrained('users');
-                $table->text('address')->nullable();
-                $table->string('lat')->nullable();
-                $table->string('lng')->nullable();
+                $table->foreignId('user_address_id')->nullable()->constrained('user_addresses')->nullOnDelete();
                 $table->string('phone')->nullable();
+                $table->string('full_name')->nullable();
                 $table->float('delivery_price', 8, 2)->default(0);
                 $table->date('delivery_date')->nullable();
                 $table->string('delivery_time')->nullable();
@@ -74,6 +73,8 @@ return new class extends Migration
                 $table->date('date_from')->nullable();
             });
         }
+
+
         if (!Schema::hasColumn('orders', 'date_to')) {
             Schema::table('orders', function (Blueprint $table) {
                 $table->date('date_to')->nullable();
@@ -146,19 +147,9 @@ return new class extends Migration
                 $table->foreignId('lord_id')->nullable()->constrained('users');
             });
         }
-        if (!Schema::hasColumn('orders', 'address')) {
+        if (!Schema::hasColumn('orders', 'user_address_id')) {
             Schema::table('orders', function (Blueprint $table) {
-                $table->text('address')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('orders', 'lat')) {
-            Schema::table('orders', function (Blueprint $table) {
-                $table->string('lat')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('orders', 'lng')) {
-            Schema::table('orders', function (Blueprint $table) {
-                $table->string('lng')->nullable();
+                $table->foreignId('user_address_id')->nullable()->constrained('user_addresses')->nullOnDelete();
             });
         }
         if (!Schema::hasColumn('orders', 'phone')) {
@@ -166,6 +157,11 @@ return new class extends Migration
                 $table->string('phone')->nullable();
             });
         }
+         if (!Schema::hasColumn('orders', 'full_name')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('full_name')->nullable();
+            });
+         }
         if (!Schema::hasColumn('orders', 'delivery_price')) {
             Schema::table('orders', function (Blueprint $table) {
                 $table->float('delivery_price', 8, 2)->default(0);
@@ -199,7 +195,7 @@ return new class extends Migration
         }
         if (!Schema::hasColumn('orders', 'city_id')) {
             Schema::table('orders', function (Blueprint $table) {
-                $table->foreignId('city_id')->nulla ble()->constrained('cities')->cascadeOnDelete();
+                $table->foreignId('city_id')->nullable()->constrained('cities')->cascadeOnDelete();
             });
         }
         if (!Schema::hasColumn('orders', 'deleted_at')) {

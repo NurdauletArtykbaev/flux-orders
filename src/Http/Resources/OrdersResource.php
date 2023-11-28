@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nurdaulet\FluxOrders\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Nurdaulet\FluxOrders\Helpers\OrderHelper;
 
 final class OrdersResource extends JsonResource
 {
@@ -12,13 +13,12 @@ final class OrdersResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'rent_price' => $this->rent_price,
             'total_price' => $this->total_price,
             'status' => $this->status,
+            'type_raw' => $this->type ?? OrderHelper::TYPE_RENT,
+            'type' => OrderHelper::TYPES[$this->type] ??  OrderHelper::TYPES[OrderHelper::TYPE_RENT],
             'created_at' => $this->created_at,
-            'rent_type' => new RentTypeResource($this->whenLoaded('rentType')),
-            'rent_value' => $this->rent_value,
-            'item' => new ItemResource($this->whenLoaded('item')),
+            'items' => ItemsResource::collection($this->whenLoaded('items')),
             'city' => new CityResource($this->whenLoaded('city')),
         ];
     }

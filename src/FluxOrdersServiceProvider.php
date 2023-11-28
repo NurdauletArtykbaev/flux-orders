@@ -52,9 +52,10 @@ class FluxOrdersServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations/check_cancel_reasons_table.php.stub' => $this->getMigrationFileName(0,'check_flux_orders_cancel_reasons_table.php'),
             __DIR__ . '/../database/migrations/check_payment_methods_table.php.stub' => $this->getMigrationFileName(1,'check_flux_orders_payment_methods_table.php'),
             __DIR__ . '/../database/migrations/check_orders_table.php.stub' => $this->getMigrationFileName(2,'check_flux_orders_orders_table.php'),
-            __DIR__ . '/../database/migrations/check_canceled_orders_table.php.stub' => $this->getMigrationFileName(3,'check_flux_orders_canceled_orders_table.php'),
-            __DIR__ . '/../database/migrations/check_verify_issued_order.php.stub' => $this->getMigrationFileName(4,'check_flux_orders_verify_issued_order.php'),
-            __DIR__ . '/../database/migrations/check_verify_return_order.php.stub' => $this->getMigrationFileName(5,'check_flux_orders_verify_return_order.php'),
+            __DIR__ . '/../database/migrations/check_order_item_table.php.stub' => $this->getMigrationFileName(3,'check_flux_orders_order_item_table.php'),
+            __DIR__ . '/../database/migrations/check_canceled_orders_table.php.stub' => $this->getMigrationFileName(4,'check_flux_orders_canceled_orders_table.php'),
+            __DIR__ . '/../database/migrations/check_verify_issued_order.php.stub' => $this->getMigrationFileName(5,'check_flux_orders_verify_issued_order.php'),
+            __DIR__ . '/../database/migrations/check_verify_return_order.php.stub' => $this->getMigrationFileName(6,'check_flux_orders_verify_return_order.php'),
         ], 'flux-base-migrations');
     }
 

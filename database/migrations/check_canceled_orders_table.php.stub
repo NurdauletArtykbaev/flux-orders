@@ -20,7 +20,7 @@ return new class extends Migration {
                 $table->foreignId('order_id')->nullable()->constrained('orders')->cascadeOnDelete();
                 $table->foreignId('cancel_id')->nullable()->constrained('cancel_reasons')->nullOnDelete();
                 $table->text('comment')->nullable();
-                $table->foreignId('lord_id')->constrained('users');
+                $table->foreignId('lord_id')->nullable()->constrained('users');
                 $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
                 $table->softDeletes();
                 $table->timestamps();
@@ -47,12 +47,12 @@ return new class extends Migration {
         }
         if (!Schema::hasColumn('canceled_orders', 'lord_id')) {
             Schema::table('canceled_orders', function (Blueprint $table) {
-                $table->foreignId('lord_id')->constrained('users');
+                $table->foreignId('lord_id')->nullable()->constrained('users');
             });
         }
         if (!Schema::hasColumn('canceled_orders', 'client_id')) {
             Schema::table('canceled_orders', function (Blueprint $table) {
-                $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
+                $table->foreignId('client_id')->nullable()->constrained('users')->cascadeOnDelete();
             });
         }
         if (!Schema::hasColumn('canceled_orders', 'deleted_at')) {

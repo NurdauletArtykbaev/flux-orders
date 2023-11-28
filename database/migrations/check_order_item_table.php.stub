@@ -22,6 +22,7 @@ return new class extends Migration
                 $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
                 $table->integer('price')->default(0);
                 $table->string('rent_value')->nullable();
+                $table->integer('quantity')->default(1);
                 $table->foreignId('rent_type_id')->nullable()->constrained('rent_types');
                 $table->timestamps();
                 $table->softDeletes();
@@ -51,9 +52,10 @@ return new class extends Migration
                 $table->string('rent_value')->nullable();
             });
         }
-        if (!Schema::hasColumn('order_item', 'receive_method_id')) {
+        if (!Schema::hasColumn('order_item', 'quantity')) {
             Schema::table('order_item', function (Blueprint $table) {
-                $table->foreignId('receive_method_id')->nullable()->constrained('receive_methods')->nullOnDelete();
+                $table->integer('quantity')->default(1);
+
             });
         }
         if (!Schema::hasColumn('order_item', 'rent_type_id')) {

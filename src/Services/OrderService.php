@@ -2,14 +2,10 @@
 
 namespace Nurdaulet\FluxOrders\Services;
 
+use Nurdaulet\FluxItems\Facades\ItemsFacade;
 use Nurdaulet\FluxItems\Helpers\ItemHelper;
 use Nurdaulet\FluxOrders\Helpers\OrderHelper;
-use App\Helpers\RentalDayHelper;
-use App\Helpers\TransactionHelper;
-use App\Helpers\UserHelper;
-use App\Models\CanceledOrder;
-use App\Models\Order;
-use App\Notifications\TelegramNotification;
+use Nurdaulet\FluxOrders\Models\Order;
 use Nurdaulet\FluxItems\Repositories\ItemRepository;
 use Nurdaulet\FluxOrders\Models\Cart;
 use Nurdaulet\FluxOrders\Repositories\CanceledOrderRepository;
@@ -40,8 +36,11 @@ class OrderService
     public function show($id)
     {
         return $this->orderRepository->find($id, [
-            'items.images', 'rentType',
-            'receiveMethod', 'paymentMethod', 'city'
+            'items.images',
+//            'rentType',
+            'address',
+            'receiveMethod',
+            'paymentMethod', 'city'
         ]);
 //        $order->ad->user->contract_url = $order->ad->user->contract_url ?? null;
 //        return $order;
@@ -60,125 +59,31 @@ class OrderService
         ]);
     }
 
-
-//    public function downloadOrderContract($id): JsonResponse
-//    {
-//        $contractUrl = $this->getSellerContract($id);
-//
-//        return response()
-//            ->json(['file_url' => $contractUrl]);
-//    }
-
-//    public function getSellerContract($id): string
-//    {
-//        $order = $this->orderRepository->find($id, ['user', 'ad.user']);
-//
-//        $replacement = [
-//            '(Ф.И.О.) арендатора' => Str::ucfirst($order->ad->user->surname) . ' ' . Str::ucfirst($order->ad->user->name),
-//            '(Ф.И.О.) арендадателя' => Str::ucfirst($order->user->surname) . ' ' . Str::ucfirst($order->user->name),
-//            '(Ф.И.О.)' => Str::ucfirst($order->user->surname) . ' ' . Str::ucfirst($order->user->name),
-//            '(ИИН)' => $order->user->iin,
-//            '(товар)' => $order->ad->name,
-//        ];
-//
-//        if (empty($order->ad->user->contract)) {
-//            abort(400, trans('Contract not found'));
-//        }
-//
-//        $url = config('filesystems.disks.s3.url') . '/' . $order->ad->user->contract;
-//
-//        $contractExtension = pathinfo($url, PATHINFO_EXTENSION);
-//
-//        try {
-//            if ($contractExtension == 'pdf') {
-//                $contract = $this->identificationService->handleContractPdf($url, $replacement);
-//                $path = UserHelper::TEMPT_CONTRACT_DIR . Str::uuid() . '_contract' . '.pdf';
-//            } else {
-//                $contract = $this->identificationService->handleContractDoc($url, $replacement);
-//                $path = UserHelper::TEMPT_CONTRACT_DIR . Str::uuid() . '_contract' . '.docx';
-//            }
-//
-//            Storage::disk('s3')->put($path, $contract);
-//
-//            return Storage::disk('s3')->url($path);
-//        } catch (\Exception $exception) {
-//            abort(400, 'Попробуйте попозже');
-//        }
-//    }
-
-    public function calculateOrderTotalPriceIfUsedBonus($isUsedBonus, $user, $totalPrice)
-    {
-        if ($isUsedBonus == 'true' ) {
-            // librarypackage wallet
-//            $user->loadMissing('balance');
-
-//        if ($isUsedBonus == 'true' && $user->balance && $user->balance->bonus > 0) {
-//            if ($user->balance->bonus) {
-//                $usedBonus = $user->balance->bonus;
-//                if ($totalPrice >= $user->balance->bonus) {
-//                    $totalPrice = $totalPrice - $user->balance->bonus;
-//                } else {
-//                    $bonus = $user->balance->bonus - $totalPrice;
-//                    $usedBonus = $user->balance->bonus - $bonus;
-//                    $totalPrice = 0;
-//                }
-//                return [$totalPrice, $usedBonus];
-//            }
-        }
-        return [$totalPrice, 0];
-    }
-
     public function createFromCart($user, $data)
     {
-//        $this->checkByLimitCancelledOrder($user);
-//        $item = $this->itemRepository->find($request->get('item_id'), ['user']);
-//        $isUsedBonus = $data['is_used_bonus'] ?? false;
-        $cart = Cart::with(['items' => fn($query) => $query->with(ItemHelper::getPriceRelation())])->firstOrFail();
-//        $cart = config('flux-items.models.cart')::where('user_id', $user->id)
-//            ->with(['paymentMethod', 'items' => function ($query) {
-//                return $query->with([ItemHelper::getPriceRelation(), 'images', 'pivot.receiveMethod', 'pivot.userAddress']);
-//            }])
-//            ->first();
+        $cart = Cart::with(['items' => fn($query) => $query->with(ItemHelper::getPriceRelation())])
+            ->firstOrFail();
 
-//        if (!$cart?->id) {
-//            return new Cart();
-//        }
         $lords = config('flux-items.models.user')::whereIn('id', $cart->items->pluck('user_id')->toArray())->get();
-
 
         foreach ($lords as $lord) {
             $items = $cart->items->where('user_id', $user->id);
             $itemsTypes = $items->pluck('type')->unique()->toArray();
-            if (count($itemsTypes) > 1) {
-                foreach ($itemsTypes as $itemsType) {
-                    $itemsTypeBy = $items->where('type', $itemsType);
-
-
-                }
+            foreach ($itemsTypes as $itemsType) {
+                $orderData = $this->prepareCreateFromCartOrderData($cart, $user, $lord, $items);
+                DB::beginTransaction();
+                $order = Order::create($orderData);
+                $orderItems = $this->prepareCreateFromCartOrderItemsData($items);
+                $order->items()->attach($orderItems);
+                DB::commit();
             }
-            dd($items->pluck('type')->unique()->toArray());
-//            $user->setRelation('items', $items);
-//        }
-//        dd($user);
-//        $cart->setRelation('users', $users);
-//        foreach ($cart->users as $user) {
-            $order = \Nurdaulet\FluxOrders\Models\Order::create([
-                'user_id' => $user->id,
-                'lord_id' => $lord->id,
-                'platform' => request('platform'),
-            ]);
-            dd($order);
-            $order->items()->saveMany([
-
-            ]);
         }
-        $data = $this->prepareCreateData($user,$data);
+        $cart->delete();
+//        $data = $this->prepareCreateData($user, $data);
 
-        DB::beginTransaction();
-        $order = $this->orderRepository->create($data);
+//        $order = $this->orderRepository->create($data);
 //        $this->payOrderIfUsedBonus($isUsedBonus, $user, $order, $totalPrice);
 
-        DB::commit();
 
 //        if (app()->isProduction()) {
 //            if (config('flux-orders.options.send_sms_when_created_order', false)) {
@@ -192,12 +97,11 @@ class OrderService
 ////                $order->notify(new TelegramNotification());
 //            }
 //        }
-        return $order;
     }
 
     public function payOrderIfUsedBonus($isUsedBonus, $user, $order, $totalPrice): void
     {
-        if ($isUsedBonus == 'true' ) {
+        if ($isUsedBonus == 'true') {
 //        if ($isUsedBonus == 'true' && $user->balance && $user->balance->bonus > 0) {
             // pay librarypackage  wallet
 //            if ($user->balance->bonus) {
@@ -224,107 +128,38 @@ class OrderService
         }
     }
 
-    private function prepareCreateData($user, $data)
+    private function prepareCreateFromCartOrderItemsData($items)
     {
-        $item = $this->itemRepository->find($data['item_id'], ['user']);
-        $totalPrice = $data['total_price'];
 
-//        [$totalPrice, $usedBonus] = $this->calculateOrderTotalPriceIfUsedBonus($isUsedBonus, $user, $totalPrice);
+        $orderItems = [];
+        foreach ($items as $item) {
+            [$price, $oldPrice] = ItemHelper::getPrice($item, $item->pivot->rent_type_id);
+            $orderItems[$item->id] = [
+                'rent_type_id' => $item->pivot->rent_type_id,
+                'quantity' => $item->pivot->quantity,
+                'rent_value' => $item->pivot->rent_value,
+                'price' => $price < $oldPrice ? $oldPrice : $price,
+            ];
+        }
+        return $orderItems;
+    }
 
+    private function prepareCreateFromCartOrderData($cart, $user, $lord, $items)
+    {
         return [
-            'city_id' => (int)$data['city_id'],
-            'phone' => $data['phone'] ?? null,
+            'type' => OrderHelper::getTypeFromItemType($items->first()->type),
+            'phone' => $cart->phone,
             'user_id' => $user->id,
-            'lord_id' => $item->user_id,
-            'receive_method_id' => $data['receive_method_id'] ?? null,
-            // receive_method_id - null
-            'delivery_price' => $data['delivery_price'] ?? null,
-            // delivery_price - 0
-            'delivery_date' => $data['delivery_date'] ?? null,
-            // delivery_date - null
-            'payment_method_id' => $data['payment_method_id'] ?? null,
-            'platform' => request()->header('platform'),
-            'comment' => $data['comment'] ?? null,
-            'rent_price' => $data['rent_price'] ?? null,
-            'total_price' => $totalPrice,
-            'address' => $data['address'] ?? null,
-            'lat' => $data['lat'] ?? null,
-            'lng' => $data['lng'] ?? null,
-            'rent_value' => $data['rent_value'] ?? null,
-            'delivery_time' => $data['delivery_time'] ?? null,
-            'is_fast_delivery' => ($data['is_fast_delivery'] ?? null) == 'true',
-            'rent_type_id' => $data['rent_type_id'] ?? null,
+            'full_name' => $cart->full_name,
+            'city_id' => request()->header('city_id'),
+            'lord_id' => $lord->id,
+            'user_address_id' => $items->pluck('pivot.user_address_id')->unique()->first(),
+            'payment_method_id' => $cart->payment_method_id,
+            'receive_method_id' => $items->pluck('pivot.receive_method_id')->unique()->first(),
+            'platform' => request('platform'),
             'status' => Order::GENERAL_NEW,
-            'bonus' => $usedBonus,
             'client_status' => OrderHelper::CLIENT_PROCESSING,
             'lord_status' => OrderHelper::LORD_NEW_ORDER,
         ];
-
     }
-
-    public function checkByLimitCancelledOrder($user)
-    {
-        $cancelledOrdersCount = $this->orderRepository->count([
-            'user_id' => $user->id,
-            'created_at' => now(),
-            'status' => OrderHelper::STATUS_CANCELED,
-        ]);
-
-        if ($cancelledOrdersCount >= OrderHelper::CANCELLED_ORDER_COUNT_LIMIT) {
-            abort(400, trans('errors.orders.cancelled_limit'));
-        }
-    }
-
-    public function calculateDateTo($order)
-    {
-        $dateFrom = now();
-        return match ($order->rentType->slug) {
-            RentalDayHelper::TYPE_HOUR => $dateFrom->copy()->addHours((int)$order->rent_value),
-            RentalDayHelper::TYPE_DAY => $dateFrom->copy()->addDays((int)$order->rent_value),
-            RentalDayHelper::TYPE_WEEK => $dateFrom->copy()->addWeeks((int)$order->rent_value),
-            RentalDayHelper::TYPE_MONTH => $dateFrom->copy()->addMonths((int)$order->rent_value),
-            default => $dateFrom->copy()->addWeek(),
-        };
-    }
-//
-//    public function getRentDayCountAndDate($order)
-//    {
-//        $startDate = Carbon::create($order->accepted_at ?: $order->created_at);
-//        $countWithText = $order->rent_value . ' ';
-//        $acceptedAt = Carbon::create($order->accepted_at ?? $order->created_at);
-//        switch ($order->rental_day_type) {
-//            case RentalDayHelper::TYPE_HOUR:
-//                $days = round(((int)$order->rent_value / 24));
-//                $countWithText .= 'час(-ов)';
-//                $endDate = $acceptedAt->copy()->addDays($days);
-//                break;
-//            case RentalDayHelper::TYPE_DAY:
-//                $countWithText .= 'дня(-ей)';
-//                $endDate = $acceptedAt->copy()->addDays((int)$order->rent_value);
-//                break;
-//            case RentalDayHelper::TYPE_WEEK:
-//                $countWithText .= 'неделю(-и)';
-//                $endDate = $acceptedAt->copy()->addWeeks((int)$order->rent_value);
-//                break;
-//            case RentalDayHelper::TYPE_MONTH:
-//                $countWithText .= 'месяц(-а,-ев)';
-//                $endDate = $acceptedAt->copy()->addMonths((int)$order->rent_value);
-//                break;
-//            case RentalDayHelper::TYPE_FLIGHT:
-//                $countWithText .= 'рейс(-а)';
-//                $endDate = "«___» ____________ 202 __";
-//                break;
-//            case RentalDayHelper::TYPE_SHIFT:
-//                $countWithText .= 'смену(-ы)';
-//                $endDate = "«___» ____________ 202 __";
-//                break;
-//            default:
-//                $countWithText .= 'дня(-ей)';
-//                $endDate = "«___» ____________ 202 __";
-//        }
-//        $startDate = gettype($startDate) != 'string' ? $startDate->translatedFormat("«d» F Y") : $startDate;
-//        $endDate = gettype($endDate) != 'string' ? $endDate->translatedFormat("«d» F Y") : $endDate;
-//        return [$startDate, $endDate, $countWithText];
-//    }
-
 }

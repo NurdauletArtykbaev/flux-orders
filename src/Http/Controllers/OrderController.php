@@ -4,7 +4,7 @@ namespace Nurdaulet\FluxOrders\Http\Controllers;
 
 use Nurdaulet\FluxOrders\Http\Requests\OrderStoreRequest;
 //use Nurdaulet\FluxOrders\Http\Resources\OrderResource;
-use Nurdaulet\FluxOrders\Http\Resources\LordOrder\OrderResource;
+use Nurdaulet\FluxOrders\Http\Resources\OrderResource;
 use Nurdaulet\FluxOrders\Http\Resources\OrdersResource;
 use Nurdaulet\FluxOrders\Models\Order;
 use Nurdaulet\FluxOrders\Services\OrderService;

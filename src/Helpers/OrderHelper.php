@@ -16,14 +16,19 @@ class OrderHelper
 
 
     const STATUSES = [
-        self::STATUS_NEW       => 'Новый',
-        self::STATUS_ACCEPTED  => 'Принят',
-        self::STATUS_ACTIVE    => 'Активный',
-        self::STATUS_HISTORY    => 'История',
+        self::STATUS_NEW => 'Новый',
+        self::STATUS_ACCEPTED => 'Принят',
+        self::STATUS_ACTIVE => 'Активный',
+        self::STATUS_HISTORY => 'История',
 //        self::STATUS_CLIENT_CANCELED => 'Отменен (клиент)',
         self::STATUS_CANCELED => 'Отменен',
-        self::STATUS_FINISHED  => 'Завершен',
-        self::STATUS_EXPIRED  => 'Срок истек',
+        self::STATUS_FINISHED => 'Завершен',
+        self::STATUS_EXPIRED => 'Срок истек',
+    ];
+    const TYPES = [
+        self::TYPE_SELL => 'sell',
+        self::TYPE_RENT => 'rent',
+        self::TYPE_APPLICATION => 'application',
     ];
     const LORD_NEW_ORDER = 0;
     const CLIENT_PROCESSING = 0;
@@ -36,11 +41,24 @@ class OrderHelper
     const LORD_GOT = 4;
     const LORD_CANCELED = 5;
     const CLIENT_RETURNED = 4;
+
     public static function calcCommissionService($amount)
     {
-        return round($amount *  self::SERVICE_COMMISSION_PERCENTAGE / 100) ;
+        return round($amount * self::SERVICE_COMMISSION_PERCENTAGE / 100);
     }
+
     const TYPE_SELL = 1;
     const TYPE_RENT = 2;
     const TYPE_APPLICATION = 3;
+
+    public static function getTypeFromItemType($itemType)
+    {
+        if ($itemType == 'rent') {
+            return self::TYPE_RENT;
+        } else if ($itemType == 'sell') {
+            return self::TYPE_SELL;
+        }
+        return self::TYPE_APPLICATION;
+
+    }
 }

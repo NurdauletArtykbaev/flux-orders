@@ -65,9 +65,14 @@ class Order extends Model
         'created_at' => 'datetime:d.m.Y H:i'
     ];
 
-    public function item()
+    public function items()
     {
-        return $this->belongsTo(Item::class)->withTrashed();
+        return $this->belongsToMany(Item::class,OrderItem::class)->withTrashed();
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(UserAddress::class,'user_address_id');
     }
 
 //    public function createdAt(): Attribute
@@ -106,20 +111,20 @@ class Order extends Model
         }
         return $date . ' ' . $this->delivery_date . ' ' . $this->delivery_time;
     }
-
-    public function status(): Attribute
-    {
-        return Attribute::make(
-            get: function (mixed $value, array $attributes) {
-
-                if ($attributes['status'] == OrderHelper::STATUS_ACTIVE) {
-                    if ($attributes['date_to'] && Carbon::create($attributes['date_to']) < now()) {
-                        return OrderHelper::STATUS_EXPIRED;
-                    }
-                }
-                return $attributes['status'];
-            });
-    }
+//
+//    public function status(): Attribute
+//    {
+//        return Attribute::make(
+//            get: function (mixed $value, array $attributes) {
+//
+//                if ($attributes['status'] == OrderHelper::STATUS_ACTIVE) {
+//                    if ($attributes['date_to'] && Carbon::create($attributes['date_to']) < now()) {
+//                        return OrderHelper::STATUS_EXPIRED;
+//                    }
+//                }
+//                return $attributes['status'];
+//            });
+//    }
 
     public function receiveMethod()
     {
