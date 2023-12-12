@@ -25,9 +25,6 @@
     "minimum-stability": "dev",
     "extra": {
         "laravel": {
-            "providers": [
-                "Nurdaulet\\FluxOrders\\FluxOrdersServiceProvider"
-            ],
             "aliases": {
                 "TextConverter": "Nurdaulet\\FluxOrders\\Facades\\TextConverter",
                 "StringFormatter": "Nurdaulet\\FluxOrders\\Facades\\StringFormatter"

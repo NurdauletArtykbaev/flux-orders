@@ -2,8 +2,6 @@
 
 
 return [
-    'table_names'=> [
-    ],
     'models' => [
         'order' => \Nurdaulet\FluxOrders\Models\Order::class,
         'canceled_order' => \Nurdaulet\FluxOrders\Models\CanceledOrder::class,
