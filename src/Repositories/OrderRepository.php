@@ -45,7 +45,7 @@ class OrderRepository
             ->update($data);
     }
 
-    public function paginate($filters = [],$relations = ['item', 'rentType'])
+    public function paginate($filters = [],$relations = ['items', 'rentType'])
     {
         return config('flux-orders.models.order')::with($relations)
             ->applyFilters(new OrderFilter(), $filters)

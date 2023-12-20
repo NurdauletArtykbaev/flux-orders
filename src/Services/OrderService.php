@@ -2,11 +2,9 @@
 
 namespace Nurdaulet\FluxOrders\Services;
 
-use Nurdaulet\FluxItems\Facades\ItemsFacade;
 use Nurdaulet\FluxItems\Helpers\ItemHelper;
 use Nurdaulet\FluxOrders\Helpers\OrderHelper;
 use Nurdaulet\FluxOrders\Models\Order;
-use Nurdaulet\FluxItems\Repositories\ItemRepository;
 use Nurdaulet\FluxOrders\Models\Cart;
 use Nurdaulet\FluxOrders\Repositories\CanceledOrderRepository;
 use Nurdaulet\FluxOrders\Repositories\OrderRepository;
@@ -20,7 +18,6 @@ class OrderService
 {
     public function __construct(
         private OrderRepository         $orderRepository,
-        private ItemRepository          $itemRepository,
         private CanceledOrderRepository $canceledOrderRepository)
     {
     }
